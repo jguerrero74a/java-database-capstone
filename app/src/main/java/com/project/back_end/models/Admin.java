@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
-@Table(name = "admins") // Define el nombre de la tabla en la base de datos
+@Table(name = "admin")
 public class Admin {
 
     @Id
@@ -23,18 +23,15 @@ public class Admin {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
-    // Constructor vacío requerido por JPA
     public Admin() {
     }
 
-    // Constructor con parámetros (opcional, útil para pruebas)
     public Admin(String username, String password) {
         this.username = username;
         this.password = password;
     }
 
     // Getters y Setters
-
     public Long getId() {
         return id;
     }

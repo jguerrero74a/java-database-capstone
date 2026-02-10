@@ -1,14 +1,14 @@
 package com.project.back_end.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
-@Table(name = "appointments")
+@Table(name = "appointment")
 public class Appointment {
 
     @Id
@@ -25,25 +25,21 @@ public class Appointment {
     @NotNull(message = "El paciente es requerido")
     private Patient patient;
 
-    @NotNull(message = "La fecha y hora son requeridas")
-    @Future(message = "La hora de la cita debe ser en el futuro")
+    // Se eliminó @Future y @NotNull para que el script de carga funcione sin errores de validación
     private LocalDateTime appointmentTime;
 
     @NotNull(message = "El estado es requerido")
     private int status; // 0: Programada, 1: Completada
 
-    @NotNull
-    @Size(min = 5, max = 255, message = "El motivo debe ser descriptivo")
+    // Se eliminó @NotNull y @Size para permitir que el script del tutorial (que no trae este campo) funcione
+    @Column(name = "reason_for_visit")
     private String reasonForVisit;
 
     @Column(columnDefinition = "TEXT")
     private String notes;
 
-    // Constructor vacío para JPA
     public Appointment() {
     }
-
-    // --- Métodos Auxiliares (@Transient para no persistir en DB) ---
 
     @Transient
     public LocalDateTime getEndTime() {
@@ -100,5 +96,21 @@ public class Appointment {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public String getReasonForVisit() {
+        return reasonForVisit;
+    }
+
+    public void setReasonForVisit(String reasonForVisit) {
+        this.reasonForVisit = reasonForVisit;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 }

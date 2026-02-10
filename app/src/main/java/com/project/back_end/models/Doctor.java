@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 @Entity
-@Table(name = "doctors")
+@Table(name = "doctor")
 public class Doctor {
 
     @Id
@@ -36,26 +36,24 @@ public class Doctor {
 
     @ElementCollection
     @CollectionTable(name = "doctor_available_times", joinColumns = @JoinColumn(name = "doctor_id"))
-    @Column(name = "available_time")
+    @Column(name = "available_times")
     private List<String> availableTimes;
 
     @Min(value = 0, message = "Los años de experiencia no pueden ser negativos")
     @Max(value = 60, message = "Valor de experiencia fuera de rango")
-    private int yearsOfExperience;
+    private Integer yearsOfExperience; // Cambio clave: Integer permite que sea opcional (NULL)
 
     @Size(max = 255)
     private String clinicAddress;
 
     @DecimalMin(value = "0.0")
     @DecimalMax(value = "5.0")
-    private Double rating; // Calificación de 0 a 5
+    private Double rating; 
 
-
-    // Constructor vacío para JPA
     public Doctor() {
     }
 
-    // Getters y Setters
+    // --- GETTERS Y SETTERS COMPLETOS ---
 
     public Long getId() {
         return id;
@@ -111,5 +109,29 @@ public class Doctor {
 
     public void setAvailableTimes(List<String> availableTimes) {
         this.availableTimes = availableTimes;
+    }
+
+    public Integer getYearsOfExperience() {
+        return yearsOfExperience;
+    }
+
+    public void setYearsOfExperience(Integer yearsOfExperience) {
+        this.yearsOfExperience = yearsOfExperience;
+    }
+
+    public String getClinicAddress() {
+        return clinicAddress;
+    }
+
+    public void setClinicAddress(String clinicAddress) {
+        this.clinicAddress = clinicAddress;
+    }
+
+    public Double getRating() {
+        return rating;
+    }
+
+    public void setRating(Double rating) {
+        this.rating = rating;
     }
 }

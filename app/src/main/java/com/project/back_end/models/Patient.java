@@ -5,10 +5,12 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Past;
+import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
-@Table(name = "patients")
+@Table(name = "patient")
 public class Patient {
 
     @Id
@@ -37,7 +39,7 @@ public class Patient {
     @Size(max = 255, message = "La dirección no puede exceder los 255 caracteres")
     private String address;
 
-    @NotNull
+    // Se eliminó @NotNull para permitir el INSERT del tutorial sin fecha
     @Past(message = "La fecha de nacimiento debe ser una fecha pasada")
     private LocalDate dateOfBirth;
 
@@ -47,11 +49,10 @@ public class Patient {
     @JsonProperty("medical_insurance")
     private String insuranceProvider;
 
-    // Constructor vacío para JPA
     public Patient() {
     }
 
-    // Getters y Setters
+    // Getters y Setters completados
 
     public Long getId() {
         return id;
@@ -99,5 +100,29 @@ public class Patient {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public String getEmergencyContact() {
+        return emergencyContact;
+    }
+
+    public void setEmergencyContact(String emergencyContact) {
+        this.emergencyContact = emergencyContact;
+    }
+
+    public String getInsuranceProvider() {
+        return insuranceProvider;
+    }
+
+    public void setInsuranceProvider(String insuranceProvider) {
+        this.insuranceProvider = insuranceProvider;
     }
 }

@@ -4,6 +4,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Min;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Document(collection = "prescriptions")
 public class Prescription {
@@ -99,4 +101,27 @@ public class Prescription {
     public void setDoctorNotes(String doctorNotes) {
         this.doctorNotes = doctorNotes;
     }
+public int getRefillCount() {
+        return refillCount;
+    }
+
+    public void setRefillCount(int refillCount) {
+        this.refillCount = refillCount;
+    }
+
+    public String getPharmacyName() {
+        return pharmacyName;
+    }
+
+    public void setPharmacyName(String pharmacyName) {
+        this.pharmacyName = pharmacyName;
+    }
+
+    public String getInternalSystemCode() {
+        return internalSystemCode;
+    }
+
+    public void setInternalSystemCode(String internalSystemCode) {
+        this.internalSystemCode = internalSystemCode;
+    }    
 }
