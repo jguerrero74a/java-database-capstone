@@ -37,6 +37,16 @@ public class Patient {
     @Size(max = 255, message = "La dirección no puede exceder los 255 caracteres")
     private String address;
 
+    @NotNull
+    @Past(message = "La fecha de nacimiento debe ser una fecha pasada")
+    private LocalDate dateOfBirth;
+
+    @Size(min = 3, max = 100)
+    private String emergencyContact;
+
+    @JsonProperty("medical_insurance")
+    private String insuranceProvider;
+
     // Constructor vacío para JPA
     public Patient() {
     }

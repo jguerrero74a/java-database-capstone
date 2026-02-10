@@ -32,6 +32,13 @@ public class Appointment {
     @NotNull(message = "El estado es requerido")
     private int status; // 0: Programada, 1: Completada
 
+    @NotNull
+    @Size(min = 5, max = 255, message = "El motivo debe ser descriptivo")
+    private String reasonForVisit;
+
+    @Column(columnDefinition = "TEXT")
+    private String notes;
+
     // Constructor vacío para JPA
     public Appointment() {
     }

@@ -29,6 +29,15 @@ public class Prescription {
     @Size(max = 200, message = "Las notas no pueden exceder los 200 caracteres")
     private String doctorNotes;
 
+    @Min(0)
+    private int refillCount;
+
+    @Size(max = 100)
+    private String pharmacyName;
+
+    @JsonIgnore // Ejemplo de campo interno que no se envía al cliente
+    private String internalSystemCode;
+
     // Constructor vacío requerido por Spring Data
     public Prescription() {
     }

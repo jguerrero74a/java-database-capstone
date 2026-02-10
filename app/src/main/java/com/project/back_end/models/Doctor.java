@@ -39,6 +39,18 @@ public class Doctor {
     @Column(name = "available_time")
     private List<String> availableTimes;
 
+    @Min(value = 0, message = "Los años de experiencia no pueden ser negativos")
+    @Max(value = 60, message = "Valor de experiencia fuera de rango")
+    private int yearsOfExperience;
+
+    @Size(max = 255)
+    private String clinicAddress;
+
+    @DecimalMin(value = "0.0")
+    @DecimalMax(value = "5.0")
+    private Double rating; // Calificación de 0 a 5
+
+
     // Constructor vacío para JPA
     public Doctor() {
     }
