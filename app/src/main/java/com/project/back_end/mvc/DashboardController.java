@@ -24,16 +24,18 @@ public class DashboardController {
      */
     @GetMapping("/adminDashboard/{token}")
     public String adminDashboard(@PathVariable String token) {
+        //System.out.println("LOG: Se ha recibido una petición para el Dashboard con token: " + token);
         // Usamos el método de validación de Service
         Map<String, Object> validationResult = service.validateTokenForDashboard(token, "admin");
 
         // Verificamos si el token es válido
         if (validationResult.containsKey("isValid") && (boolean) validationResult.get("isValid")) {
-            return "admin/adminDashboard";
+            //return "admin/adminDashboard";
+            return "adminDashboard";
         }
 
         // Redirección si falla la validación
-        return "redirect:http://localhost:8080";
+        return "redirect:https://jguerrero74-8080.theiadockernext-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai";
     }
 
     /**
@@ -47,6 +49,6 @@ public class DashboardController {
             return "doctor/doctorDashboard";
         }
 
-        return "redirect:http://localhost:8080";
+        return "redirect:https://jguerrero74-8080.theiadockernext-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai";
     }
 }
