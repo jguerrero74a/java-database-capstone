@@ -1,80 +1,114 @@
-/* This is the style sheet for the patientDashboard.html */
-  .card-actions {
+/* patientDashboard.css - Panel del Paciente */
+
+/* --- 1. Acciones de la tarjeta del doctor --- */
+.card-actions {
     background-color: #244557;
     padding: 10px;
     text-align: center;
-  }
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border-radius: 0 0 10px 10px; /* Alineado con la base de la tarjeta */
+}
 
-  .card-actions:hover{
+.card-actions:hover {
     background-color: #1c3745;
-  }
-  .ripple-overlay {
+}
+
+/* --- 2. Superposición de Ripple (Retroalimentación Visual) --- */
+.ripple-overlay {
     position: fixed;
+    top: 50%;
+    left: 50%;
     width: 20px;
     height: 20px;
     background-color: #1c3745;
     border-radius: 50%;
     z-index: 9999;
+    pointer-events: none; /* No interfiere con clics */
     transform: translate(-50%, -50%) scale(0);
     transition: transform 1s ease-out, opacity 1s ease;
-  }
-  
-  .ripple-overlay.active {
+    opacity: 0;
+}
+
+.ripple-overlay.active {
     transform: translate(-50%, -50%) scale(150);
     opacity: 1;
-  }
-  
-  .modalApp {
-    position: fixed;
-  bottom: -100%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 50%;
-  background: #fff;
-  padding: 20px;
-  z-index: 10000;
-  transition: bottom 1.5s ease-in;
-  box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.3);
-  border-radius: 10px 10px 0 0;
-  text-align: center;
-  }
-  
-  .modalApp.active {
-    bottom: 0;
-  }
-  
-  .modalApp h2 {
-    margin-top: 20px;
-  }
-  
-  .modalApp input {
-    display: block;
-    margin: 10px auto;
-    padding: 10px;
-    width: 90%;
-    margin-bottom: 40px;
-  }
+}
 
-  .modalApp select {
+/* --- 3. Modal emergente inferior para reservas --- */
+.modalApp {
+    position: fixed;
+    bottom: -100%; /* Oculto inicialmente abajo */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%;
+    max-width: 500px; /* Asegura legibilidad en pantallas grandes */
+    background: #fff;
+    padding: 20px;
+    z-index: 10000;
+    transition: bottom 1s cubic-bezier(0.25, 1, 0.5, 1); /* Deslizamiento suave */
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.3);
+    border-radius: 20px 20px 0 0; /* Esquinas superiores redondeadas */
+    text-align: center;
+}
+
+.modalApp.active {
+    bottom: 0; /* Se desliza hacia arriba */
+}
+
+/* --- 4. Campos de formulario dentro del modal --- */
+.modalApp h2 {
+    margin-top: 10px;
+    color: #244557;
+    font-size: 24px;
+}
+
+.modalApp input, 
+.modalApp select {
     display: block;
-    margin: 10px auto;
-    padding: 10px;
+    margin: 15px auto;
+    padding: 12px;
     width: 90%;
-    margin-bottom: 40px;
-  }
-  
-  .confirm-booking {
-    padding: 10px 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+}
+
+.modalApp input:focus, 
+.modalApp select:focus {
+    border-color: #1c3745;
+    box-shadow: 0 0 5px rgba(28, 55, 69, 0.2);
+}
+
+/* --- 5. Botón de confirmación de reserva --- */
+.confirm-booking {
+    padding: 12px 25px;
     background: #1c3745;
     color: #fff;
     border: none;
+    border-radius: 25px; /* Aspecto redondeado y moderno */
     cursor: pointer;
-    
-  
-    
-  }
-  .confirm-booking:hover {
+    font-size: 16px;
+    font-weight: bold;
+    transition: filter 0.3s ease, transform 0.2s ease;
+    margin-top: 10px;
+}
+
+.confirm-booking:hover {
     filter: brightness(1.2);
     background-color: #1c3745;
-  }
-  
+}
+
+.confirm-booking:active {
+    transform: scale(0.95); /* Feedback al hacer clic */
+}
+
+/* --- 6. Diseño Responsivo --- */
+@media (max-width: 768px) {
+    .modalApp {
+        width: 90%; /* Más ancho en móviles */
+        padding: 15px;
+    }
+}

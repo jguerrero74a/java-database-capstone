@@ -123,3 +123,141 @@
   16. **Render the Header**: Finally, the `renderHeader()` function is called to initialize the header rendering process when the page loads.
 */
    
+/* header.js - Renderizado dinámico del encabezado */
+
+function renderHeader() {
+    const headerDiv = document.getElementById("header");
+    if (!headerDiv) return;
+
+    // 1. Verificar si estamos en la página de inicio (Root)
+    // En la raíz, limpiamos el almacenamiento para asegurar un estado limpio
+    if (window.location.pathname === "/" || window.location.pathname.endsWith("index.html")) {
+        localStorage.removeItem("userRole");
+        localStorage.removeItem("token");
+        
+        headerDiv.innerHTML = `
+            <header class="header">
+                <div class="logo-section">
+                    <img src="../assets/images/logo/logo.png" alt="Hospital Logo" class="logo-img">
+                    <span class="logo-title">Hospital CMS</span>
+                </div>
+            </header>`;
+        return;
+    }
+
+    // 2. Obtener rol y token de localStorage
+    const role = localStorage.getItem("userRole");
+    const token = localStorage.getItem("token");
+
+    // 3. Verificar sesión expirada o manejo inválido
+    if ((role === "loggedPatient" || role === "admin" || role === "doctor") && !token) {
+        localStorage.removeItem("userRole");
+        alert("Sesión expirada o inicio de sesión inválido. Por favor, inicie sesión nuevamente.");
+        window.location.href = "/";
+        return;
+    }
+
+    // 4. Iniciar construcción del contenido del encabezado
+    let headerContent = `
+        <header class="header">
+            <div class="logo-section" onclick="window.location.href='/'" style="cursor:pointer">
+                <img src="../assets/images/logo/logo.png" alt="Hospital Logo" class="logo-img">
+                <span class="logo-title">Hospital CMS</span>
+            </div>
+            <nav class="nav-menu">`;
+
+    // 5. Inyectar HTML apropiado según el ROL
+    if (role === "admin") {
+        headerContent += `
+            <button id="addDocBtn" class="adminBtn">Agregar Doctor</button>
+            <a href="#" class="logout-link" onclick="logout()">Cerrar sesión</a>`;
+    } 
+    else if (role === "doctor") {
+        headerContent += `
+            <button id="homeBtn" class="adminBtn">Inicio</button>
+            <a href="#" class="logout-link" onclick="logout()">Cerrar sesión</a>`;
+    } 
+    else if (role === "patient") {
+        headerContent += `
+            <button id="patientLogin" class="adminBtn">Iniciar sesión</button>
+            <button id="patientSignup" class="adminBtn">Registrarse</button>`;
+    } 
+    else if (role === "loggedPatient") {
+        headerContent += `
+            <button id="homeBtn" class="adminBtn">Inicio</button>
+            <button id="patientAppointments" class="adminBtn">Citas</button>
+            <a href="#" class="logout-link" onclick="logoutPatient()">Cerrar sesión</a>`;
+    }
+
+    headerContent += `</nav></header>`;
+
+    // 6. Finalizar la Inyección del Encabezado
+    headerDiv.innerHTML = headerContent;
+
+    // 7. Adjuntar los Escuchadores de Eventos
+    attachHeaderButtonListeners();
+}
+
+/**
+ * Adjunta escuchadores de eventos a los elementos creados dinámicamente
+ */
+function attachHeaderButtonListeners() {
+    // Botón Agregar Doctor (Solo Admin)
+    const addDocBtn = document.getElementById("addDocBtn");
+    if (addDocBtn) {
+        addDocBtn.addEventListener("click", () => {
+            if (typeof openModal === "function") openModal('addDoctor');
+        });
+    }
+
+    // Botones de Inicio (Doctor y Paciente Logueado)
+    const homeBtn = document.getElementById("homeBtn");
+    if (homeBtn) {
+        homeBtn.addEventListener("click", () => {
+            const role = localStorage.getItem("userRole");
+            if (role === "doctor") window.location.href = "/doctor/doctorDashboard.html";
+            if (role === "loggedPatient") window.location.href = "/pages/patientDashboard.html";
+        });
+    }
+
+    // Botón de Citas (Solo Paciente Logueado)
+    const appointmentsBtn = document.getElementById("patientAppointments");
+    if (appointmentsBtn) {
+        appointmentsBtn.addEventListener("click", () => {
+            window.location.href = "/pages/patientAppointments.html";
+        });
+    }
+
+    // Botones de Login/Registro (Solo Paciente No Logueado)
+    const pLogin = document.getElementById("patientLogin");
+    if (pLogin) {
+        pLogin.addEventListener("click", () => {
+            if (typeof openModal === "function") openModal('patientLogin');
+        });
+    }
+
+    const pSignup = document.getElementById("patientSignup");
+    if (pSignup) {
+        pSignup.addEventListener("click", () => {
+            if (typeof openModal === "function") openModal('patientSignup');
+        });
+    }
+}
+
+/**
+ * Funciones de Cierre de Sesión
+ */
+function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userRole");
+    window.location.href = "/";
+}
+
+function logoutPatient() {
+    localStorage.removeItem("token");
+    localStorage.setItem("userRole", "patient"); // Restablece a rol visitante
+    window.location.href = "/pages/patientDashboard.html";
+}
+
+// Inicializar el renderizado del encabezado
+renderHeader();
