@@ -1,6 +1,6 @@
 package com.project.back_end.mvc;
 
-import com.project.back_end.services.TokenService; // Asegúrate de que el paquete de TokenService sea el correcto
+import com.project.back_end.services.Service; // Revertido a Service
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,43 +15,38 @@ import java.util.Map;
 @Controller
 public class DashboardController {
 
-    // 2. Dependencias Autowired: Inyectar el servicio de validación de tokens
+    // Volvemos a inyectar Service para mantener la consistencia con el resto del proyecto
     @Autowired
-    private TokenService tokenService;
+    private Service service;
 
     /**
-     * 3. Define el método adminDashboard:
-     * Maneja el acceso al tablero del administrador mediante validación de token.
+     * Maneja el acceso al tablero del administrador.
      */
     @GetMapping("/adminDashboard/{token}")
     public String adminDashboard(@PathVariable String token) {
-        // Llama a validateToken para el rol "admin"
-        Map<String, Object> validationResult = tokenService.validateToken(token, "admin");
+        // Usamos el método de validación de Service
+        Map<String, Object> validationResult = service.validateTokenForDashboard(token, "admin");
 
-        // Si el mapa está vacío, el token es válido
-        if (validationResult.isEmpty()) {
+        // Verificamos si el token es válido
+        if (validationResult.containsKey("isValid") && (boolean) validationResult.get("isValid")) {
             return "admin/adminDashboard";
         }
 
-        // Si no está vacío, el token es inválido o el rol no coincide
+        // Redirección si falla la validación
         return "redirect:http://localhost:8080";
     }
 
     /**
-     * 4. Define el método doctorDashboard:
-     * Maneja el acceso al tablero del doctor mediante validación de token.
+     * Maneja el acceso al tablero del doctor.
      */
     @GetMapping("/doctorDashboard/{token}")
     public String doctorDashboard(@PathVariable String token) {
-        // Llama a validateToken para el rol "doctor"
-        Map<String, Object> validationResult = tokenService.validateToken(token, "doctor");
+        Map<String, Object> validationResult = service.validateTokenForDashboard(token, "doctor");
 
-        // Si el mapa está vacío, el token es válido
-        if (validationResult.isEmpty()) {
+        if (validationResult.containsKey("isValid") && (boolean) validationResult.get("isValid")) {
             return "doctor/doctorDashboard";
         }
 
-        // Si no está vacío, redirigir a la página de inicio de sesión
         return "redirect:http://localhost:8080";
     }
 }
