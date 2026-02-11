@@ -56,3 +56,106 @@
     - Log the error to the console
     - Show a generic error message
 */
+
+/* index.js - Manejo de Inicio de Sesión Basado en Roles */
+
+// Importar Módulos Requeridos
+import { openModal } from '../components/modals.js';
+import { API_BASE_URL } from '../config/config.js';
+
+// Definir constantes para los endpoints
+const ADMIN_API = API_BASE_URL + '/admin';
+const DOCTOR_API = API_BASE_URL + '/doctor/login';
+
+/**
+ * Configurar los escuchadores de eventos al cargar la página
+ */
+window.onload = function () {
+    const adminBtn = document.getElementById('adminLogin');
+    const doctorBtn = document.getElementById('doctorLogin');
+
+    if (adminBtn) {
+        adminBtn.addEventListener('click', () => {
+            openModal('adminLogin');
+        });
+    }
+
+    if (doctorBtn) {
+        doctorBtn.addEventListener('click', () => {
+            openModal('doctorLogin');
+        });
+    }
+};
+
+/**
+ * Implementar el manejador de inicio de sesión de Admin
+ * Se asigna a window para que sea accesible desde el atributo onclick del HTML del modal
+ */
+window.adminLoginHandler = async function () {
+    const username = document.getElementById('adminUsername').value;
+    const password = document.getElementById('adminPassword').value;
+
+    const admin = { username, password };
+
+    try {
+        const response = await fetch(ADMIN_API, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(admin)
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            // Almacenar el token en localStorage
+            localStorage.setItem('token', data.token);
+            // Llamar a selectRole para persistir el rol y redirigir
+            // Nota: selectRole debe estar definida en render.js y cargada globalmente
+            if (typeof selectRole === 'function') {
+                selectRole('admin');
+            }
+        } else {
+            alert("¡Credenciales inválidas!");
+        }
+    } catch (error) {
+        console.error("Error en el inicio de sesión del Admin:", error);
+        alert("Ocurrió un error inesperado. Por favor, intente de nuevo.");
+    }
+};
+
+/**
+ * Implementar el manejador de inicio de sesión de Doctor
+ * Se asigna a window para acceso global
+ */
+window.doctorLoginHandler = async function () {
+    const email = document.getElementById('doctorEmail').value;
+    const password = document.getElementById('doctorPassword').value;
+
+    const doctor = { email, password };
+
+    try {
+        const response = await fetch(DOCTOR_API, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(doctor)
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            // Almacenar el token en localStorage
+            localStorage.setItem('token', data.token);
+            // Llamar a selectRole para persistir el rol y redirigir
+            if (typeof selectRole === 'function') {
+                selectRole('doctor');
+            }
+        } else {
+            alert("¡Credenciales inválidas!");
+        }
+    } catch (error) {
+        console.error("Error en el inicio de sesión del Doctor:", error);
+        alert("Ocurrió un error inesperado. Por favor, intente de nuevo.");
+    }
+};

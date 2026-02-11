@@ -70,3 +70,137 @@
 
     If saving fails, show an error message
 */
+
+/* adminDashboard.js - Gestión de Médicos para el Administrador */
+
+// 1. Importar Módulos Requeridos
+import { openModal } from './components/modals.js';
+import { getDoctors, filterDoctors, saveDoctor } from './services/doctorServices.js';
+import { createDoctorCard } from './components/doctorCard.js';
+
+/**
+ * Vinculación de Eventos y Carga Inicial
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    // Vincular botón "Agregar Médico"
+    const addDocBtn = document.getElementById('addDocBtn');
+    if (addDocBtn) {
+        addDocBtn.addEventListener('click', () => {
+            openModal('addDoctor');
+        });
+    }
+
+    // Configurar oyentes para búsqueda y filtros
+    const searchBar = document.getElementById("searchBar");
+    const filterTime = document.getElementById("filterTime");
+    const filterSpecialty = document.getElementById("filterSpecialty");
+
+    if (searchBar) searchBar.addEventListener("input", filterDoctorsOnChange);
+    if (filterTime) filterTime.addEventListener("change", filterDoctorsOnChange);
+    if (filterSpecialty) filterSpecialty.addEventListener("change", filterDoctorsOnChange);
+
+    // Cargar tarjetas al inicio
+    loadDoctorCards();
+});
+
+/**
+ * Función: loadDoctorCards
+ * Obtiene todos los médicos y los muestra en el tablero.
+ */
+async function loadDoctorCards() {
+    try {
+        const doctors = await getDoctors();
+        renderDoctorCards(doctors);
+    } catch (error) {
+        console.error("Error cargando médicos:", error);
+    }
+}
+
+/**
+ * Función: filterDoctorsOnChange
+ * Recoge los valores actuales de filtro/búsqueda y actualiza la UI.
+ */
+async function filterDoctorsOnChange() {
+    try {
+        const name = document.getElementById("searchBar").value || "null";
+        const time = document.getElementById("filterTime").value || "null";
+        const specialty = document.getElementById("filterSpecialty").value || "null";
+
+        const doctors = await filterDoctors(name, time, specialty);
+        
+        const contentDiv = document.getElementById("content");
+        if (doctors.length === 0) {
+            contentDiv.innerHTML = "<p>No se encontraron médicos con los filtros seleccionados.</p>";
+        } else {
+            renderDoctorCards(doctors);
+        }
+    } catch (error) {
+        console.error("Error al filtrar:", error);
+        alert("Ocurrió un error al filtrar los médicos.");
+    }
+}
+
+/**
+ * Función: renderDoctorCards
+ * Función utilitaria para limpiar el contenedor y renderizar una lista de médicos.
+ */
+function renderDoctorCards(doctors) {
+    const contentDiv = document.getElementById("content");
+    contentDiv.innerHTML = ""; // Limpia el contenido existente
+
+    doctors.forEach(doctor => {
+        const card = createDoctorCard(doctor);
+        contentDiv.appendChild(card);
+    });
+}
+
+/**
+ * Función: adminAddDoctor
+ * Recoge los datos del formulario modal y guarda un nuevo médico.
+ * Se asigna a window para ser accesible desde el modal.
+ */
+window.adminAddDoctor = async function () {
+    // 1. Verificar token
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("Error: No se encontró un token de sesión válido.");
+        return;
+    }
+
+    // 2. Recoger valores del formulario
+    const name = document.getElementById("docName").value;
+    const specialty = document.getElementById("docSpecialty").value;
+    const email = document.getElementById("docEmail").value;
+    const password = document.getElementById("docPassword").value;
+    const mobile = document.getElementById("docMobile").value;
+    
+    // Recoger disponibilidad de los checkboxes
+    const availability = Array.from(document.querySelectorAll('input[name="availability"]:checked'))
+                              .map(cb => cb.value);
+
+    // 3. Crear objeto doctor
+    const doctor = {
+        name,
+        specialty,
+        email,
+        password,
+        mobile,
+        availability
+    };
+
+    // 4. Enviar solicitud
+    try {
+        const result = await saveDoctor(doctor, token);
+        
+        if (result.success) {
+            alert("¡Médico agregado exitosamente!");
+            // 5. Refrescar UI
+            location.reload(); 
+        } else {
+            alert("Fallo al guardar: " + result.message);
+        }
+    } catch (error) {
+        console.error("Error en adminAddDoctor:", error);
+        alert("Error inesperado al intentar agregar al médico.");
+    }
+};

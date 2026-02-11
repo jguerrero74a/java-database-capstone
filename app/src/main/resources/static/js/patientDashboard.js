@@ -1,136 +1,137 @@
-// patientDashboard.js
-import { getDoctors } from './services/doctorServices.js';
-import { openModal } from './components/modals.js';
+/* patientDashboard.js – Ver y Filtrar Médicos */
+
+// Importar Módulos Requeridos
 import { createDoctorCard } from './components/doctorCard.js';
-import { filterDoctors } from './services/doctorServices.js';//call the same function to avoid duplication coz the functionality was same
-import { patientSignup, patientLogin } from './services/patientServices.js';
+import { openModal } from './components/modals.js';
+import { getDoctors, filterDoctors } from './services/doctorServices.js';
+import { patientLogin, patientSignup } from './services/patientServices.js';
 
-
-
+/**
+ * Inicialización al cargar el DOM
+ */
 document.addEventListener("DOMContentLoaded", () => {
-  loadDoctorCards();
+    // Cargar Tarjetas de Médicos al inicio
+    loadDoctorCards();
+
+    // Vincular Disparadores de Modal
+    const signupBtn = document.getElementById("patientSignup");
+    if (signupBtn) signupBtn.addEventListener("click", () => openModal("patientSignup"));
+
+    const loginBtn = document.getElementById("patientLogin");
+    if (loginBtn) loginBtn.addEventListener("click", () => openModal("patientLogin"));
+
+    // Lógica de Búsqueda y Filtro (Listeners)
+    document.getElementById("searchBar").addEventListener("input", filterDoctorsOnChange);
+    document.getElementById("filterTime").addEventListener("change", filterDoctorsOnChange);
+    document.getElementById("filterSpecialty").addEventListener("change", filterDoctorsOnChange);
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("patientSignup");
-  if (btn) {
-    btn.addEventListener("click", () => openModal("patientSignup"));
-  }
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  const loginBtn = document.getElementById("patientLogin")
-  if (loginBtn) {
-    loginBtn.addEventListener("click", () => {
-      openModal("patientLogin")
-    })
-  }
-})
-
-function loadDoctorCards() {
-  getDoctors()
-    .then(doctors => {
-      const contentDiv = document.getElementById("content");
-      contentDiv.innerHTML = "";
-
-      doctors.forEach(doctor => {
-        const card = createDoctorCard(doctor);
-        contentDiv.appendChild(card);
-      });
-    })
-    .catch(error => {
-      console.error("Failed to load doctors:", error);
-    });
-}
-// Filter Input
-document.getElementById("searchBar").addEventListener("input", filterDoctorsOnChange);
-document.getElementById("filterTime").addEventListener("change", filterDoctorsOnChange);
-document.getElementById("filterSpecialty").addEventListener("change", filterDoctorsOnChange);
-
-
-
-function filterDoctorsOnChange() {
-  const searchBar = document.getElementById("searchBar").value.trim();
-  const filterTime = document.getElementById("filterTime").value;
-  const filterSpecialty = document.getElementById("filterSpecialty").value;
-
-
-  const name = searchBar.length > 0 ? searchBar : null;
-  const time = filterTime.length > 0 ? filterTime : null;
-  const specialty = filterSpecialty.length > 0 ? filterSpecialty : null;
-
-  filterDoctors(name, time, specialty)
-    .then(response => {
-      const doctors = response.doctors;
-      const contentDiv = document.getElementById("content");
-      contentDiv.innerHTML = "";
-
-      if (doctors.length > 0) {
-        console.log(doctors);
-        doctors.forEach(doctor => {
-          const card = createDoctorCard(doctor);
-          contentDiv.appendChild(card);
-        });
-      } else {
-        contentDiv.innerHTML = "<p>No doctors found with the given filters.</p>";
-        console.log("Nothing");
-      }
-    })
-    .catch(error => {
-      console.error("Failed to filter doctors:", error);
-      alert("❌ An error occurred while filtering doctors.");
-    });
-}
-
-window.signupPatient = async function () {
-  try {
-    const name = document.getElementById("name").value;
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    const phone = document.getElementById("phone").value;
-    const address = document.getElementById("address").value;
-
-    const data = { name, email, password, phone, address };
-    const { success, message } = await patientSignup(data);
-    if (success) {
-      alert(message);
-      document.getElementById("modal").style.display = "none";
-      window.location.reload();
+/**
+ * Función: loadDoctorCards
+ * Obtiene y muestra todos los médicos disponibles.
+ */
+async function loadDoctorCards() {
+    try {
+        const doctors = await getDoctors();
+        renderDoctorCards(doctors);
+    } catch (error) {
+        console.error("Failed to load doctors:", error);
     }
-    else alert(message);
-  } catch (error) {
-    console.error("Signup failed:", error);
-    alert("❌ An error occurred while signing up.");
-  }
+}
+
+/**
+ * Función: filterDoctorsOnChange
+ * Activa el filtrado dinámico según la entrada del usuario.
+ */
+async function filterDoctorsOnChange() {
+    const searchBarValue = document.getElementById("searchBar").value.trim();
+    const filterTimeValue = document.getElementById("filterTime").value;
+    const filterSpecialtyValue = document.getElementById("filterSpecialty").value;
+
+    const name = searchBarValue.length > 0 ? searchBarValue : null;
+    const time = filterTimeValue.length > 0 ? filterTimeValue : null;
+    const specialty = filterSpecialtyValue.length > 0 ? filterSpecialtyValue : null;
+
+    try {
+        const doctors = await filterDoctors(name, time, specialty);
+        renderDoctorCards(doctors);
+    } catch (error) {
+        console.error("Failed to filter doctors:", error);
+        alert("❌ An error occurred while filtering doctors.");
+    }
+}
+
+/**
+ * Utilidad de Renderizado: renderDoctorCards
+ * Limpia el contenedor e inyecta las tarjetas de los médicos.
+ */
+export function renderDoctorCards(doctors) {
+    const contentDiv = document.getElementById("content");
+    contentDiv.innerHTML = "";
+
+    if (doctors && doctors.length > 0) {
+        doctors.forEach(doctor => {
+            const card = createDoctorCard(doctor);
+            contentDiv.appendChild(card);
+        });
+    } else {
+        contentDiv.innerHTML = "<p>No doctors found with the given filters.</p>";
+    }
+}
+
+/**
+ * Manejo de Registro de Pacientes
+ */
+window.signupPatient = async function () {
+    try {
+        const name = document.getElementById("name").value;
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const phone = document.getElementById("phone").value;
+        const address = document.getElementById("address").value;
+
+        const data = { name, email, password, phone, address };
+        const result = await patientSignup(data);
+
+        if (result.success) {
+            alert("✅ " + result.message);
+            // Cerrar modal (si tienes acceso al elemento) y recargar
+            const modal = document.getElementById("modal");
+            if (modal) modal.style.display = "none";
+            window.location.reload();
+        } else {
+            alert("❌ " + result.message);
+        }
+    } catch (error) {
+        console.error("Signup failed:", error);
+        alert("❌ An error occurred while signing up.");
+    }
 };
 
+/**
+ * Manejar el Inicio de Sesión del Paciente
+ */
 window.loginPatient = async function () {
-  try {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+    try {
+        const email = document.getElementById("loginEmail").value; // Asegúrate que el ID sea correcto en tu HTML
+        const password = document.getElementById("loginPassword").value;
 
-    const data = {
-      email,
-      password
+        const data = { email, password };
+        const response = await patientLogin(data);
+
+        if (response.ok) {
+            const result = await response.json();
+            // Almacenar token y rol
+            localStorage.setItem('token', result.token);
+            if (typeof selectRole === 'function') selectRole('loggedPatient');
+            
+            alert("✅ Login successful!");
+            window.location.href = '/pages/loggedPatientDashboard.html';
+        } else {
+            alert('❌ Invalid credentials!');
+        }
+    } catch (error) {
+        console.error("Error during login:", error);
+        alert("❌ Failed to Login. Please try again.");
     }
-    console.log("loginPatient :: ", data)
-    const response = await patientLogin(data);
-    console.log("Status Code:", response.status);
-    console.log("Response OK:", response.ok);
-    if (response.ok) {
-      const result = await response.json();
-      console.log(result);
-      selectRole('loggedPatient');
-      localStorage.setItem('token', result.token)
-      window.location.href = '/pages/loggedPatientDashboard.html';
-    } else {
-      alert('❌ Invalid credentials!');
-    }
-  }
-  catch (error) {
-    alert("❌ Failed to Login : ", error);
-    console.log("Error :: loginPatient :: ", error)
-  }
-
-
-}
+};
