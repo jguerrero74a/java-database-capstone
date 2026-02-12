@@ -1,23 +1,41 @@
 // patientRows.js
 export function createPatientRow(patient, appointmentId, doctorId) {
-  const tr = document.createElement("tr");
-  console.log("CreatePatientRow :: ", doctorId)
-  tr.innerHTML = `
-      <td class="patient-id">${patient.id}</td>
-      <td>${patient.name}</td>
-      <td>${patient.phone}</td>
-      <td>${patient.email}</td>
-      <td><img src="../assets/images/addPrescriptionIcon/addPrescription.png" alt="addPrescriptionIcon" class="prescription-btn" data-id="${patient.id}"></img></td>
+    if (!patient) return document.createElement("tr");
+
+    const tr = document.createElement("tr");
+    
+    // Verificación de datos para evitar "undefined" en la UI
+    const pName = patient.name || "N/A";
+    const pPhone = patient.phone || "Sin teléfono";
+    const pEmail = patient.email || "Sin correo";
+
+    tr.innerHTML = `
+        <td class="patient-id" style="cursor:pointer; color:blue; text-decoration:underline;">
+            ${patient.id}
+        </td>
+        <td>${pName}</td>
+        <td>${pPhone}</td>
+        <td>${pEmail}</td>
+        <td>
+            <img src="../assets/images/addPrescriptionIcon/addPrescription.png" 
+                 alt="Prescription" 
+                 class="prescription-btn" 
+                 style="cursor:pointer; width:25px;"
+                 data-id="${patient.id}">
+        </td>
     `;
 
-  // Attach event listeners
-  tr.querySelector(".patient-id").addEventListener("click", () => {
-    window.location.href = `/pages/patientRecord.html?id=${patient.id}&doctorId=${doctorId}`;
-  });
+    // 1. Navegar al Historial del Paciente
+    tr.querySelector(".patient-id").addEventListener("click", () => {
+        window.location.href = `/pages/patientRecord.html?id=${patient.id}&doctorId=${doctorId}`;
+    });
 
-  tr.querySelector(".prescription-btn").addEventListener("click", () => {
-    window.location.href = `/pages/addPrescription.html?appointmentId=${appointmentId}&patientName=${patient.name}`;
-  });
+    // 2. Navegar a Crear Receta
+    tr.querySelector(".prescription-btn").addEventListener("click", () => {
+        // Codificamos el nombre por si tiene espacios o caracteres especiales
+        const encodedName = encodeURIComponent(pName);
+        window.location.href = `/pages/addPrescription.html?appointmentId=${appointmentId}&patientName=${encodedName}`;
+    });
 
-  return tr;
+    return tr;
 }

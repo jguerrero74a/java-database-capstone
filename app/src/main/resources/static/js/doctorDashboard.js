@@ -10,7 +10,7 @@ const token = localStorage.getItem('token');
 
 // Obtener fecha de hoy en formato YYYY-MM-DD
 let selectedDate = new Date().toISOString().split('T')[0];
-let patientName = "null"; // Inicializado como "null" para el backend
+let patientName = "none"; // Inicializado como "null" para el backend
 
 /**
  * Configurar la funcionalidad de la Barra de Búsqueda
@@ -20,7 +20,7 @@ if (searchBar) {
     searchBar.addEventListener('input', (e) => {
         const value = e.target.value.trim();
         // Si está vacío, enviamos "null", de lo contrario el nombre
-        patientName = value !== "" ? value : "null";
+        patientName = value !== "" ? value : "none";
         loadAppointments();
     });
 }
@@ -53,41 +53,34 @@ if (datePicker) {
  * Función: loadAppointments
  * Propósito: Obtener y mostrar citas basadas en la fecha y filtro de nombre.
  */
+
 async function loadAppointments() {
     try {
-        // Paso 1: Obtener datos de la API
-        const appointments = await getAllAppointments(selectedDate, patientName, token);
+        const data = await getAllAppointments(selectedDate, patientName, token);
 
-        // Paso 2: Limpiar contenido existente
+        // EXTRAER LA LISTA: El Java envía un Map con la clave "appointments"
+        const appointments = data.appointments || []; 
+
         tableBody.innerHTML = "";
 
-        // Paso 3: Validar si existen citas
-        if (!appointments || appointments.length === 0) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="5" style="text-align: center;">No se encontraron citas para hoy.</td>
-                </tr>`;
+        if (appointments.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center;">No se encontraron citas.</td></tr>`;
             return;
         }
 
-        // Paso 4: Renderizar filas
-        appointments.forEach(appointment => {
-            // Extraer detalles para el componente de fila
-            const row = createPatientRow(appointment);
+        appointments.forEach(app => {
+            // Mapeo según tu Appointment.java (asumiendo que tiene .patient e .id)
+            // Extraemos también el doctorId del token o del objeto si viene ahí
+            const row = createPatientRow(app.patient, app.id, app.doctor?app.doctor.id : ""); 
             tableBody.appendChild(row);
         });
 
     } catch (error) {
-        // Paso 5: Manejo de errores
         console.error("Error al cargar citas:", error);
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="5" style="text-align: center; color: red;">
-                    Error cargando las citas. Inténtelo más tarde.
-                </td>
-            </tr>`;
+        tableBody.innerHTML = `<tr><td colspan="5" style="color: red; text-align: center;">Error al cargar datos.</td></tr>`;
     }
 }
+
 
 /**
  * Renderizado Inicial al Cargar la Página
