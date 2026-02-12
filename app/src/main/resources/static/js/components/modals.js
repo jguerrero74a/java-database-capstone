@@ -64,7 +64,7 @@ export function openModal(type) {
     } else if (type === 'doctorLogin') {
         modalContent = `
             <h2>Doctor Login</h2>
-            <input type="text" id="doctorEmail" placeholder="Email" class="input-field">
+            <input type="text" id="doctorUsername" placeholder="Username" class="input-field">
             <input type="password" id="doctorPassword" placeholder="Password" class="input-field">
             <button class="dashboard-btn" id="doctorLoginBtn">Login</button>
         `;

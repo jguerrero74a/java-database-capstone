@@ -85,17 +85,17 @@ window.adminLoginHandler = async function () {
  * Implementar el manejador de inicio de sesión de Doctor
  */
 window.doctorLoginHandler = async function () {
-    const emailField = document.getElementById('doctorEmail');
+    const usernameField = document.getElementById('doctorUsername');
     const passwordField = document.getElementById('doctorPassword');
 
-    if (!emailField || !passwordField) {
+    if (!usernameField || !passwordField) {
         console.error("No se encontraron los campos de entrada de Doctor");
         return;
     }
 
-    const email = emailField.value;
+    const username = usernameField.value;
     const password = passwordField.value;
-    const doctor = { email, password };
+    const doctor = { username, password };
 
     try {
         console.log("Intentando login de Doctor...");
