@@ -163,26 +163,30 @@
   
 
   .modal {
-    display: none;
+    display: none; /* Se activa con JS como 'flex' */
     position: fixed;
-    z-index: 999;
-    padding-top: 60px;
+    z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.6);
-  }
-  
-  .modal-content {
+    background-color: rgba(0, 0, 0, 0.6);
+    
+    /* Estas 2 líneas centran la caja blanca */
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
     background-color: white;
-    margin: auto;
     padding: 30px;
     border-radius: 10px;
-    width: 400px;
+    width: 400px;         /* Ancho de la caja */
+    max-width: 90%;       /* Para móviles */
     position: relative;
-  }
-  
+    margin: 0;            /* Reset de margen */
+}
+ 
   .modal-content h2{
     font-size: 32px;
   }
@@ -195,7 +199,8 @@
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
-  }
+}
+
   
   .close:hover {
     color: black;
