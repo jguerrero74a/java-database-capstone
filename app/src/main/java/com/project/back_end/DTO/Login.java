@@ -1,45 +1,31 @@
 package com.project.back_end.DTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonAlias;
 
-/**
- * Login DTO: Clase para representar los datos de la solicitud de inicio de sesión.
- * Se utiliza para recibir las credenciales del cliente mediante @RequestBody.
- */
 public class Login {
 
     @JsonProperty("email")
-    private String identifier;
-    
+    @JsonAlias({"username", "adminUsername", "doctorEmail", "identifier"})
+    private String email;
+
+    @JsonProperty("password")
+    @JsonAlias({"adminPassword", "doctorPassword"})
     private String password;
 
-    // Constructor por defecto
-    public Login() {
-    }
+    public Login() {}
 
-    /**
-     * Constructor con parámetros para inicialización rápida.
-     */
-    public Login(String identifier, String password) {
-        this.identifier = identifier;
-        this.password = password;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    // Getters and Setters
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-    public String getIdentifier() {
-        return identifier;
-    }
-
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    // Métodos de compatibilidad manual para asegurar el éxito del mapeo
+    public void setAdminUsername(String adminUsername) { this.email = adminUsername; }
+    public void setAdminPassword(String adminPassword) { this.password = adminPassword; }
+    public void setUsername(String username) { this.email = username; }
+    
+    // Método que utiliza el Service para obtener el usuario
+    public String getIdentifier() { return email; }
 }
