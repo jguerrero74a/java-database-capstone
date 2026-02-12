@@ -25,8 +25,6 @@ export function openModal(type) {
                 <option value="gastroenterologist">Gastroenterologist</option>
                 <option value="general">General Physician</option>
             </select>
-            <input type="email" id="doctorEmail" placeholder="Email" class="input-field">
-            <input type="password" id="doctorPassword" placeholder="Password" class="input-field">
             <input type="text" id="doctorPhone" placeholder="Mobile No." class="input-field">
             <div class="availability-container">
                 <label class="availabilityLabel">Select Availability:</label>

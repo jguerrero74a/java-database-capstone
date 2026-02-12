@@ -176,7 +176,6 @@
     justify-content: center;
     align-items: center;
 }
-
 .modal-content {
     background-color: white;
     padding: 30px;
@@ -186,7 +185,7 @@
     position: relative;
     margin: 0;            /* Reset de margen */
 }
- 
+
   .modal-content h2{
     font-size: 32px;
   }
@@ -385,3 +384,11 @@
   accent-color: #015c5db8; 
 }
 
+#modal-body {
+    padding: 0 !important;
+    border-radius: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    box-shadow: none !important;
+    background-color: transparent !important; /* Para que use el fondo de .modal-content */
+}
