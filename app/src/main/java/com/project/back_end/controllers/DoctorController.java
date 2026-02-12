@@ -130,11 +130,12 @@ public class DoctorController {
             @PathVariable String time,
             @PathVariable String speciality) {
 
-        String filterName = name.equalsIgnoreCase("none") ? null : name;
-        String filterTime = time.equalsIgnoreCase("none") ? null : time;
-        String filterSpec = speciality.equalsIgnoreCase("none") ? null : speciality;
+        // Normalizar valores que representan nulidad
+        String filterName = (name.equalsIgnoreCase("null") || name.equalsIgnoreCase("none")) ? null : name;
+        String filterTime = (time.equalsIgnoreCase("null") || time.equalsIgnoreCase("none")) ? null : time;
+        String filterSpec = (speciality.equalsIgnoreCase("null") || speciality.equalsIgnoreCase("none")) ? null : speciality;
 
-        // Aquí Service.filterDoctor ahora devuelve el Map que espera ResponseEntity
-        return ResponseEntity.ok(service.filterDoctor(filterName, filterSpec, filterTime));
+        // Llamamos a la lógica unificada en DoctorService
+        return ResponseEntity.ok(doctorService.filterDoctors(filterName, filterSpec, filterTime));
     }
 }
