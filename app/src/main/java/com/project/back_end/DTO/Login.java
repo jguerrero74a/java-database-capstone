@@ -1,15 +1,19 @@
 package com.project.back_end.DTO;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Login DTO: Clase para representar los datos de la solicitud de inicio de sesión.
  * Se utiliza para recibir las credenciales del cliente mediante @RequestBody.
  */
 public class Login {
 
+    @JsonProperty("email")
     private String identifier;
+    
     private String password;
 
-    // 3. Constructor: Se utiliza el constructor por defecto (implícito)
+    // Constructor por defecto
     public Login() {
     }
 
@@ -21,7 +25,7 @@ public class Login {
         this.password = password;
     }
 
-    // 4. Getters and Setters: Estándar para habilitar la deserialización JSON
+    // Getters and Setters
 
     public String getIdentifier() {
         return identifier;

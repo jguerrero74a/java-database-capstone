@@ -34,34 +34,44 @@ public class TokenService {
 
     public String createToken(Long id, String role) {
         return Jwts.builder()
-                .subject(String.valueOf(id)) // .setSubject() -> .subject()
+                .subject(String.valueOf(id)) 
                 .claim("role", role)
-                .issuedAt(new Date(System.currentTimeMillis())) // .setIssuedAt() -> .issuedAt()
-                .expiration(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000)) // .setExpiration() -> .expiration()
-                .signWith(getSigningKey()) // Ya no requiere SignatureAlgorithm.HS256 explícito
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000))
+                .signWith(getSigningKey())
                 .compact();
     }
 
+    // MANTENEMOS ESTE NOMBRE para que AppointmentService y PatientService no fallen
     public String extractEmail(String token) {
         return Jwts.parser() 
-                .verifyWith(getSigningKey()) // .setSigningKey() -> .verifyWith()
-                .build() // El .build() es esencial ahora
-                .parseSignedClaims(token) // .parseClaimsJws() -> .parseSignedClaims()
-                .getPayload() // .getBody() -> .getPayload()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
                 .getSubject();
     }
     
+    // Alias por si alguna otra clase usa extractSubject
+    public String extractSubject(String token) {
+        return extractEmail(token);
+    }
+
     public Long extractId(String token) {
         return Long.parseLong(extractEmail(token));
     }
 
     public boolean validateToken(String token, String userType) {
         try {
-            String identifier = extractEmail(token);
+            String subject = extractEmail(token);
+            // Validamos usando findById porque el subject contiene el ID numérico
             switch (userType.toUpperCase()) {
-                case "ADMIN": return adminRepository.findByUsername(identifier) != null;
-                case "DOCTOR": return doctorRepository.findByEmail(identifier) != null;
-                case "PATIENT": return patientRepository.findByEmail(identifier) != null;
+                case "ADMIN": 
+                    return adminRepository.findById(Long.parseLong(subject)).isPresent();
+                case "DOCTOR": 
+                    return doctorRepository.findById(Long.parseLong(subject)).isPresent();
+                case "PATIENT": 
+                    return patientRepository.findById(Long.parseLong(subject)).isPresent();
                 default: return false;
             }
         } catch (Exception e) {
