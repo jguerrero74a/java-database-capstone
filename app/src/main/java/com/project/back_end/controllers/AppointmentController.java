@@ -33,7 +33,6 @@ public class AppointmentController {
             @PathVariable String patientName,
             @PathVariable String token) {
 
-        // CORRECCIÓN: validateToken devuelve boolean. Si es falso, retornamos UNAUTHORIZED.
         if (!service.validateToken(token, "doctor")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token for doctor role");
         }
@@ -44,6 +43,7 @@ public class AppointmentController {
 
     /**
      * 4. Reserva una nueva cita.
+     * URL: /appointments/{token}
      */
     @PostMapping("/{token}")
     public ResponseEntity<Map<String, String>> bookAppointment(
@@ -52,15 +52,11 @@ public class AppointmentController {
 
         Map<String, String> response = new HashMap<>();
 
-        // CORRECCIÓN: Validar token (boolean)
         if (!service.validateToken(token, "patient")) {
             response.put("message", "Invalid token for patient role");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
 
-        // CORRECCIÓN: Manejar el hecho de que validateAppointment ahora devuelve un ResponseEntity
-        // Para que tu lógica de 'validationCode' funcione, debemos llamar al servicio de forma que nos dé el código
-        // O adaptar la lógica. Aquí lo adaptamos para que use el servicio correctamente:
         ResponseEntity<Map<String, String>> validationResponse = service.validateAppointment(appointment);
         
         if (validationResponse.getStatusCode() == HttpStatus.OK) {
@@ -73,7 +69,6 @@ public class AppointmentController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
             }
         } else {
-            // Si la validación falla, devolvemos el error que envió el servicio
             return validationResponse;
         }
     }

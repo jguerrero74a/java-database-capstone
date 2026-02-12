@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,7 +23,6 @@ public class PatientService {
     private final AppointmentRepository appointmentRepository;
     private final TokenService tokenService;
 
-    // 2. Inyección por Constructor para dependencias
     public PatientService(PatientRepository patientRepository, 
                           AppointmentRepository appointmentRepository, 
                           TokenService tokenService) {
@@ -31,27 +31,26 @@ public class PatientService {
         this.tokenService = tokenService;
     }
 
-    // 1. Crear Paciente
     @Transactional
     public int createPatient(Patient patient) {
         try {
             patientRepository.save(patient);
             return 1;
         } catch (Exception e) {
-            // Log de error (simulado)
             System.err.println("Error al guardar paciente: " + e.getMessage());
             return 0;
         }
     }
 
-    // 2. Obtener Citas del Paciente con validación de Token
     @Transactional(readOnly = true)
     public ResponseEntity<Map<String, Object>> getPatientAppointment(Long id, String token) {
         Map<String, Object> response = new HashMap<>();
-        String emailFromToken = tokenService.extractEmail(token);
-        Patient patient = patientRepository.findByEmail(emailFromToken);
+        
+        // El token ahora contiene el ID en el subject
+        Long idFromToken = tokenService.extractId(token);
 
-        if (patient == null || !patient.getId().equals(id)) {
+        // Validación de seguridad: El ID de la URL debe coincidir con el del Token
+        if (!idFromToken.equals(id)) {
             response.put("message", "Unauthorized access to patient appointments");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
@@ -65,7 +64,6 @@ public class PatientService {
         return ResponseEntity.ok(response);
     }
 
-    // 3. Filtrar por Condición (past/future)
     @Transactional(readOnly = true)
     public ResponseEntity<Map<String, Object>> filterByCondition(String condition, Long id) {
         Map<String, Object> response = new HashMap<>();
@@ -81,7 +79,6 @@ public class PatientService {
         return ResponseEntity.ok(response);
     }
 
-    // 4. Filtrar por Doctor
     @Transactional(readOnly = true)
     public ResponseEntity<Map<String, Object>> filterByDoctor(String name, Long patientId) {
         Map<String, Object> response = new HashMap<>();
@@ -90,7 +87,6 @@ public class PatientService {
         return ResponseEntity.ok(response);
     }
 
-    // 5. Filtrar por Doctor y Condición
     @Transactional(readOnly = true)
     public ResponseEntity<Map<String, Object>> filterByDoctorAndCondition(String condition, String name, long patientId) {
         Map<String, Object> response = new HashMap<>();
@@ -101,20 +97,19 @@ public class PatientService {
         return ResponseEntity.ok(response);
     }
 
-    // 6. Obtener detalles del Paciente mediante Token
     @Transactional(readOnly = true)
     public ResponseEntity<Map<String, Object>> getPatientDetails(String token) {
         Map<String, Object> response = new HashMap<>();
         try {
-            String email = tokenService.extractEmail(token);
-            Patient patient = patientRepository.findByEmail(email);
+            Long id = tokenService.extractId(token);
+            Optional<Patient> patient = patientRepository.findById(id);
             
-            if (patient == null) {
+            if (patient.isEmpty()) {
                 response.put("message", "Patient not found");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
             
-            response.put("patient", patient);
+            response.put("patient", patient.get());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.put("message", "Error extracting token or fetching details");
@@ -122,9 +117,6 @@ public class PatientService {
         }
     }
 
-    /**
-     * Método Auxiliar para mapear Entidad Appointment a AppointmentDTO
-     */
     private AppointmentDTO convertToDTO(Appointment appointment) {
         return new AppointmentDTO(
                 appointment.getId(),

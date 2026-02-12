@@ -23,9 +23,22 @@ public class PatientController {
         this.service = service;
     }
 
+    // Endpoint requerido por la guía: /patient/{id}/patient/{token}
+    @GetMapping("/{id}/patient/{token}")
+    public ResponseEntity<?> getPatientAppointmentByGuideline(
+            @PathVariable Long id,
+            @PathVariable String token) {
+
+        if (!service.validateToken(token, "patient")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Token");
+        }
+
+        // Reutilizamos la lógica de obtención de citas
+        return patientService.getPatientAppointment(id, token);
+    }
+
     @GetMapping("/{token}")
     public ResponseEntity<?> getPatient(@PathVariable String token) {
-        // CORRECCIÓN: Usar boolean para la validación
         if (!service.validateToken(token, "patient")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Token");
         }
@@ -36,7 +49,6 @@ public class PatientController {
     public ResponseEntity<Map<String, String>> createPatient(@RequestBody Patient patient) {
         Map<String, String> response = new HashMap<>();
 
-        // CORRECCIÓN: validatePatient ahora devuelve boolean, el operador '!' funcionará
         if (!service.validatePatient(patient)) {
             response.put("message", "El paciente con el correo electrónico o número de teléfono ya existe");
             return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
@@ -82,7 +94,6 @@ public class PatientController {
         String filterCondition = condition.equalsIgnoreCase("none") ? null : condition;
         String filterName = name.equalsIgnoreCase("none") ? null : name;
 
-        // CORRECCIÓN: service.filterPatient ahora devuelve el ResponseEntity adecuado
         return service.filterPatient(filterCondition, filterName, token);
     }
 }
