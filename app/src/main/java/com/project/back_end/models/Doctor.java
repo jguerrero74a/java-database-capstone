@@ -34,14 +34,14 @@ public class Doctor {
     @Pattern(regexp = "\\d{10}", message = "El número de teléfono debe tener 10 dígitos")
     private String phone;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "doctor_available_times", joinColumns = @JoinColumn(name = "doctor_id"))
     @Column(name = "available_times")
     private List<String> availableTimes;
 
     @Min(value = 0, message = "Los años de experiencia no pueden ser negativos")
     @Max(value = 60, message = "Valor de experiencia fuera de rango")
-    private Integer yearsOfExperience; // Cambio clave: Integer permite que sea opcional (NULL)
+    private Integer yearsOfExperience; 
 
     @Size(max = 255)
     private String clinicAddress;
@@ -53,7 +53,7 @@ public class Doctor {
     public Doctor() {
     }
 
-    // --- GETTERS Y SETTERS COMPLETOS ---
+    // --- GETTERS Y SETTERS ---
 
     public Long getId() {
         return id;
