@@ -16,6 +16,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("${api.path}" + "doctor")
+@CrossOrigin(origins = "*")
 public class DoctorController {
 
     private final DoctorService doctorService;
@@ -24,6 +25,13 @@ public class DoctorController {
     public DoctorController(DoctorService doctorService, Service service) {
         this.doctorService = doctorService;
         this.service = service;
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<Map<String, Object>> getDoctors() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("doctors", doctorService.getDoctors());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/availability/{user}/{doctorId}/{date}/{token}")
@@ -43,14 +51,7 @@ public class DoctorController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
-    public ResponseEntity<Map<String, Object>> getDoctor() {
-        Map<String, Object> response = new HashMap<>();
-        response.put("doctors", doctorService.getDoctors());
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/{token}")
+    @PostMapping("/add/{token}")
     public ResponseEntity<Map<String, String>> saveDoctor(
             @RequestBody Doctor doctor,
             @PathVariable String token) {
@@ -101,7 +102,7 @@ public class DoctorController {
         }
     }
 
-    @DeleteMapping("/{id}/{token}")
+    @DeleteMapping("/delete/{id}/{token}")
     public ResponseEntity<Map<String, String>> deleteDoctor(
             @PathVariable long id,
             @PathVariable String token) {
@@ -124,18 +125,16 @@ public class DoctorController {
         }
     }
 
-    @GetMapping("/filter/{name}/{time}/{speciality}")
+    @GetMapping("/filter/{name}/{speciality}/{time}")
     public ResponseEntity<Map<String, Object>> filter(
             @PathVariable String name,
-            @PathVariable String time,
-            @PathVariable String speciality) {
+            @PathVariable String speciality,
+            @PathVariable String time) {
 
-        // Normalizar valores que representan nulidad
-        String filterName = (name.equalsIgnoreCase("null") || name.equalsIgnoreCase("none")) ? null : name;
-        String filterTime = (time.equalsIgnoreCase("null") || time.equalsIgnoreCase("none")) ? null : time;
-        String filterSpec = (speciality.equalsIgnoreCase("null") || speciality.equalsIgnoreCase("none")) ? null : speciality;
+        String filterName = (name.equalsIgnoreCase("null") || name.equalsIgnoreCase("all")) ? null : name;
+        String filterSpec = (speciality.equalsIgnoreCase("null") || speciality.equalsIgnoreCase("all")) ? null : speciality;
+        String filterTime = (time.equalsIgnoreCase("null") || time.equalsIgnoreCase("all")) ? null : time;
 
-        // Llamamos a la lógica unificada en DoctorService
         return ResponseEntity.ok(doctorService.filterDoctors(filterName, filterSpec, filterTime));
     }
 }

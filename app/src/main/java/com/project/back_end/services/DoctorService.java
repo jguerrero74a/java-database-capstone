@@ -32,66 +32,39 @@ public class DoctorService {
     }
 
     @Transactional(readOnly = true)
-    public List<String> getDoctorAvailability(Long doctorId, LocalDate date) {
-        List<String> allSlots = Arrays.asList("09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00");
-        
-        LocalDateTime start = date.atStartOfDay();
-        LocalDateTime end = date.atTime(LocalTime.MAX);
-        
-        List<Appointment> bookedAppointments = appointmentRepository.findByDoctorIdAndAppointmentTimeBetween(doctorId, start, end);
-        
-        List<String> bookedSlots = bookedAppointments.stream()
-                .map(a -> a.getAppointmentTime().toLocalTime().toString())
-                .collect(Collectors.toList());
-
-        return allSlots.stream()
-                .filter(slot -> !bookedSlots.contains(slot))
-                .collect(Collectors.toList());
-    }
-
-    @Transactional
-    public int saveDoctor(Doctor doctor) {
-        try {
-            if (doctorRepository.findByEmail(doctor.getEmail()) != null) {
-                return -1;
-            }
-            doctorRepository.save(doctor);
-            return 1;
-        } catch (Exception e) {
-            return 0;
-        }
-    }
-
-    @Transactional
-    public int updateDoctor(Doctor doctor) {
-        try {
-            if (!doctorRepository.existsById(doctor.getId())) {
-                return -1;
-            }
-            doctorRepository.save(doctor);
-            return 1;
-        } catch (Exception e) {
-            return 0;
-        }
-    }
-
-    @Transactional(readOnly = true)
     public List<Doctor> getDoctors() {
         return doctorRepository.findAll();
     }
 
+    // MÉTODO: saveDoctor (Requerido por el Controller)
     @Transactional
-    public int deleteDoctor(long id) {
+    public int saveDoctor(Doctor doctor) {
         try {
-            if (!doctorRepository.existsById(id)) return -1;
-            appointmentRepository.deleteAllByDoctorId(id);
-            doctorRepository.deleteById(id);
-            return 1;
+            if (doctorRepository.findByEmail(doctor.getEmail()) != null) {
+                return -1; // Ya existe
+            }
+            doctorRepository.save(doctor);
+            return 1; // Éxito
         } catch (Exception e) {
-            return 0;
+            return 0; // Error interno
         }
     }
 
+    // MÉTODO: updateDoctor (Requerido por el Controller)
+    @Transactional
+    public int updateDoctor(Doctor doctor) {
+        try {
+            if (!doctorRepository.existsById(doctor.getId())) {
+                return -1; // No encontrado
+            }
+            doctorRepository.save(doctor);
+            return 1; // Éxito
+        } catch (Exception e) {
+            return 0; // Error interno
+        }
+    }
+
+    // MÉTODO: validateDoctor (Requerido por el Controller)
     @Transactional(readOnly = true)
     public ResponseEntity<Map<String, String>> validateDoctor(Login login) {
         Map<String, String> response = new HashMap<>();
@@ -107,7 +80,17 @@ public class DoctorService {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
-    // --- LÓGICA DE FILTRADO UNIFICADA ---
+    @Transactional
+    public int deleteDoctor(long id) {
+        try {
+            if (!doctorRepository.existsById(id)) return -1;
+            appointmentRepository.deleteAllByDoctorId(id);
+            doctorRepository.deleteById(id);
+            return 1;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
 
     @Transactional(readOnly = true)
     public Map<String, Object> filterDoctors(String name, String specialty, String time) {
@@ -127,20 +110,38 @@ public class DoctorService {
     private boolean isTimeAvailable(List<String> availableTimes, String timeFilter) {
         if (availableTimes == null || availableTimes.isEmpty()) return false;
         
-        // Manejo de AM/PM
         if (timeFilter.equalsIgnoreCase("AM")) {
             return availableTimes.stream().anyMatch(t -> {
-                int hour = Integer.parseInt(t.split(":")[0]);
-                return hour < 12;
+                try {
+                    int hour = Integer.parseInt(t.split(":")[0]);
+                    return hour < 12;
+                } catch (Exception e) { return false; }
             });
         } else if (timeFilter.equalsIgnoreCase("PM")) {
             return availableTimes.stream().anyMatch(t -> {
-                int hour = Integer.parseInt(t.split(":")[0]);
-                return hour >= 12;
+                try {
+                    int hour = Integer.parseInt(t.split(":")[0]);
+                    return hour >= 12;
+                } catch (Exception e) { return false; }
             });
         }
-        
-        // Manejo de rangos exactos (ej: "09:00-10:00") o coincidencias parciales
         return availableTimes.stream().anyMatch(t -> t.equalsIgnoreCase(timeFilter));
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getDoctorAvailability(Long doctorId, LocalDate date) {
+        List<String> allSlots = Arrays.asList("09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00");
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = date.atTime(LocalTime.MAX);
+        
+        List<Appointment> bookedAppointments = appointmentRepository.findByDoctorIdAndAppointmentTimeBetween(doctorId, start, end);
+        
+        List<String> bookedSlots = bookedAppointments.stream()
+                .map(a -> a.getAppointmentTime().toLocalTime().toString())
+                .collect(Collectors.toList());
+
+        return allSlots.stream()
+                .filter(slot -> !bookedSlots.contains(slot))
+                .collect(Collectors.toList());
     }
 }

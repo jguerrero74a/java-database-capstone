@@ -1,23 +1,19 @@
 /* doctorCard.js */
 
-// Importaciones de servicios y utilidades
 import { deleteDoctor } from "../services/doctorServices.js";
 import { getPatientData } from "../services/patientServices.js";
-import { showBookingOverlay } from "../patientDashboard.js"; // O el archivo donde resida la lógica del overlay
+// Importamos la función desde el dashboard
+import { showBookingOverlay } from "../patientDashboard.js"; 
 
 /**
  * Crea y devuelve un elemento DOM para una tarjeta de doctor individual.
- * @param {Object} doctor - Objeto con la información del médico.
  */
 export function createDoctorCard(doctor) {
-    // 1. Crea el Contenedor Principal de la Tarjeta
     const card = document.createElement("div");
     card.classList.add("doctor-card");
 
-    // 2. Obtén el rol del usuario desde localStorage
     const role = localStorage.getItem("userRole");
 
-    // 3. Crear sección de información del doctor
     const infoDiv = document.createElement("div");
     infoDiv.classList.add("doctor-info");
 
@@ -31,21 +27,18 @@ export function createDoctorCard(doctor) {
     email.textContent = `Email: ${doctor.email}`;
 
     const availability = document.createElement("p");
-    // Se asume que doctor.availability es un arreglo de horarios
-    availability.textContent = `Availability: ${doctor.availability.join(", ")}`;
+    // Verificación de seguridad por si no hay horarios
+    const times = doctor.availability ? doctor.availability.join(", ") : "Not specified";
+    availability.textContent = `Availability: ${times}`;
 
-    // Añadir elementos individuales al contenedor de info
     infoDiv.appendChild(name);
     infoDiv.appendChild(specialization);
     infoDiv.appendChild(email);
     infoDiv.appendChild(availability);
 
-    // 4. Crear Contenedor de Botón (Acciones)
     const actionsDiv = document.createElement("div");
     actionsDiv.classList.add("card-actions");
 
-    // 5. Agregar botones condicionalmente según el rol
-    
     // === ROL: ADMINISTRADOR ===
     if (role === "admin") {
         const removeBtn = document.createElement("button");
@@ -53,17 +46,15 @@ export function createDoctorCard(doctor) {
         removeBtn.classList.add("delete-btn");
 
         removeBtn.addEventListener("click", async () => {
-            const confirmDelete = confirm(`Are you sure you want to delete Dr. ${doctor.name}?`);
-            if (confirmDelete) {
+            if (confirm(`Are you sure you want to delete Dr. ${doctor.name}?`)) {
                 const token = localStorage.getItem("token");
                 try {
                     const result = await deleteDoctor(doctor.id, token);
-                    if (result) {
+                    if (result.success) {
                         alert("Doctor deleted successfully");
-                        card.remove(); // Elimina la tarjeta del DOM
+                        card.remove();
                     }
                 } catch (error) {
-                    console.error("Error deleting doctor:", error);
                     alert("Failed to delete doctor.");
                 }
             }
@@ -72,13 +63,13 @@ export function createDoctorCard(doctor) {
     } 
     
     // === ROL: PACIENTE (NO CONECTADO) ===
-    else if (role === "patient") {
+    else if (role === "patient" || !role) {
         const bookNow = document.createElement("button");
         bookNow.textContent = "Book Now";
         bookNow.classList.add("book-btn");
 
         bookNow.addEventListener("click", () => {
-            alert("Patient needs to login first.");
+            alert("Please login as a patient to book an appointment.");
         });
         actionsDiv.appendChild(bookNow);
     } 
@@ -98,19 +89,18 @@ export function createDoctorCard(doctor) {
             }
             try {
                 const patientData = await getPatientData(token);
-                // Muestra el overlay de reserva pasando el evento, doctor y datos del paciente
+                // Aquí llamamos a la función importada
                 showBookingOverlay(e, doctor, patientData);
             } catch (error) {
                 console.error("Error fetching patient data:", error);
+                alert("Error loading booking options.");
             }
         });
         actionsDiv.appendChild(bookNow);
     }
 
-    // 6. Ensamblaje Final
     card.appendChild(infoDiv);
     card.appendChild(actionsDiv);
 
-    // 7. Devolver la tarjeta final
     return card;
 }
