@@ -42,9 +42,9 @@ async function filterDoctorsOnChange() {
     const filterTimeValue = document.getElementById("filterTime").value;
     const filterSpecialtyValue = document.getElementById("filterSpecialty").value;
 
-    const name = searchBarValue.length > 0 ? searchBarValue : null;
-    const time = filterTimeValue.length > 0 ? filterTimeValue : null;
-    const specialty = filterSpecialtyValue.length > 0 ? filterSpecialtyValue : null;
+    const name = searchBarValue.length > 0 ? searchBarValue : "none";
+    const time = filterTimeValue.length > 0 ? filterTimeValue : "none";
+    const specialty = filterSpecialtyValue.length > 0 ? filterSpecialtyValue : "none";
 
     try {
         const doctors = await filterDoctors(name, time, specialty);

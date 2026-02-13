@@ -67,17 +67,19 @@ export async function saveDoctor(doctor, token) {
  */
 export async function filterDoctors(name, specialty, time) {
     try {
-        const n = name || "all";
-        const s = specialty || "all";
-        const t = time || "all";
+const n = (name && name !== "none") ? name : "all";
+        const s = (specialty && specialty !== "none") ? specialty : "all";
+        const t = (time && time !== "none") ? time : "all";
+
+console.log(`Petición al servidor: /doctor/filter/${n}/${s}/${t}`);
 
         const response = await fetch(`${DOCTOR_API}/filter/${n}/${s}/${t}`);
         
         if (response.ok) {
-            return await response.json();
+            const data = await response.json();
+            return data.doctors || [];
         } else {
-            console.error("Error en la respuesta del servidor al filtrar");
-            return { doctors: [] };
+            return [];
         }
     } catch (error) {
         console.error("Error en la petición de filtrado:", error);
